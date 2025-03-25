@@ -15,3 +15,6 @@ spring:
     properties:
       hibernate:
         format_sql: true
+jwt:
+  secret: my-very-secret-jwt-key-should-be-long
+  token-validity-in-seconds: 3600  # 1시간
