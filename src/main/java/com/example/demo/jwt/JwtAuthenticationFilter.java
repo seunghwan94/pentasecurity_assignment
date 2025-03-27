@@ -3,43 +3,52 @@ package com.example.demo.jwt;
 import java.io.IOException;
 
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.web.filter.OncePerRequestFilter;
-
-import com.example.demo.service.CustomUserDetailsService;
+import org.springframework.stereotype.Component;
 
 import jakarta.servlet.FilterChain;
+import jakarta.servlet.GenericFilter;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import lombok.AllArgsConstructor;
 
-@AllArgsConstructor
-public class JwtAuthenticationFilter extends OncePerRequestFilter {
-  private final JwtTokenProvider jwtTokenProvider;
+@Component
+public class JwtAuthenticationFilter extends GenericFilter {
 
-    private final CustomUserDetailsService userDetailsService;
+  private final JwtUtil jwtUtil;
 
-    @Override
-    protected void doFilterInternal(HttpServletRequest request,
-                                    HttpServletResponse response,
-                                    FilterChain filterChain)
-                                    throws ServletException, IOException {
+  public JwtAuthenticationFilter(JwtUtil jwtUtil) {
+      this.jwtUtil = jwtUtil;
+  }
 
-        String token = jwtTokenProvider.resolveToken(request);
+  @Override
+  public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
+      HttpServletRequest httpReq = (HttpServletRequest) request;
+      String authHeader = httpReq.getHeader("Authorization");
+      String uri = httpReq.getRequestURI();
 
-        if (token != null && jwtTokenProvider.validateToken(token)) {
-            String userId = jwtTokenProvider.getUserId(token);
-            UserDetails userDetails = userDetailsService.loadUserByUsername(userId);
+      // Swagger 관련 요청은 필터 타지 않도록 예외처리
+      if (uri.startsWith("/v3/api-docs") || uri.startsWith("/swagger") || uri.startsWith("/swagger-ui")) {
+        chain.doFilter(request, response);
+        return;
+      }
 
-            UsernamePasswordAuthenticationToken authentication =
-                    new UsernamePasswordAuthenticationToken(
-                            userDetails, null, userDetails.getAuthorities());
+      if (authHeader != null && authHeader.startsWith("Bearer ")) {
+          try {
+              String token = authHeader.substring(7);
+              String userId = jwtUtil.validateAndGetUserId(token);
 
-            SecurityContextHolder.getContext().setAuthentication(authentication);
-        }
+              // 간단한 인증 객체 생성 (실제 권한은 여기서 처리하지 않음)
+              Authentication auth = new UsernamePasswordAuthenticationToken(userId, null, null);
+              SecurityContextHolder.getContext().setAuthentication(auth);
+          } catch (Exception e) {
+              // 토큰 오류 시 아무 것도 인증하지 않고 넘어감
+          }
+      }
 
-        filterChain.doFilter(request, response);
-    }
+      chain.doFilter(request, response);
+  }
 }
+

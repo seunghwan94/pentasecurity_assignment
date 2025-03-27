@@ -18,3 +18,9 @@ spring:
 jwt:
   secret: my-very-secret-jwt-key-should-be-long
   token-validity-in-seconds: 3600  # 1시간
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+  api-docs:
+    path: /v3/api-docs  
