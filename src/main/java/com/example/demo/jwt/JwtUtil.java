@@ -16,21 +16,21 @@ public class JwtUtil {
   private final Key key = Keys.hmacShaKeyFor(secret.getBytes());
 
   public String generateToken(String userId) {
-      return Jwts.builder()
-              .setSubject(userId)
-              .setIssuedAt(new Date())
-              .setExpiration(new Date(System.currentTimeMillis() + expirationMs))
-              .signWith(key)
-              .compact();
+    return Jwts.builder()
+            .setSubject(userId)
+            .setIssuedAt(new Date())
+            .setExpiration(new Date(System.currentTimeMillis() + expirationMs))
+            .signWith(key)
+          .compact();
   }
 
   public String validateAndGetUserId(String token) {
-      Claims claims = Jwts.parserBuilder()
-              .setSigningKey(key)
-              .build()
-              .parseClaimsJws(token)
-              .getBody();
+    Claims claims = Jwts.parserBuilder()
+            .setSigningKey(key)
+            .build()
+            .parseClaimsJws(token)
+          .getBody();
 
-      return claims.getSubject(); // userId
+    return claims.getSubject(); // userId
   }
 }

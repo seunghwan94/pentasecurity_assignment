@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>메인 페이지</title>
+</head>
+<body>
+
+<h2 th:text="${userName} + '님 환영합니다.'"></h2>
+
+<!-- 관리자 권한인 경우만 노출 -->
+<div th:if="${isAdmin}">
+  <p><a th:href="@{/admin/users}">회원 목록 보기</a></p>
+</div>
+<p><a th:href="@{/logout}">로그아웃</a></p>
+
+</body>
+</html>

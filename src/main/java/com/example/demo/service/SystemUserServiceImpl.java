@@ -31,7 +31,7 @@ public class SystemUserServiceImpl implements SystemUserService {
   @Override
   public void deleteUser(Integer userIdx, String ipAddress) {
     userRepository.deleteById(userIdx);
-    saveHistory("/api/v1/users/" + userIdx, ActionType.D, userIdx, ipAddress);
+    saveHistory("/admin/users/" + userIdx, ActionType.D, userIdx, ipAddress);
   }
 
   @Override
@@ -61,7 +61,7 @@ public class SystemUserServiceImpl implements SystemUserService {
 
     SystemUser updated = userRepository.save(user);
 
-    saveHistory("/api/v1/users/" + userIdx, ActionType.U, userIdx, ipAddress);
+    saveHistory("/admin/users/" + userIdx, ActionType.U, userIdx, ipAddress);
 
     return updated;
   }

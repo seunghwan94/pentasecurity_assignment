@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <title>회원 상세 정보</title>
+  <meta charset="UTF-8">
+</head>
+<body>
+  <h2>회원 상세 정보</h2>
+
+  <p><strong>아이디:</strong> <span th:text="${user.userId}"></span></p>
+  <p><strong>이름:</strong> <span th:text="${user.userNm}"></span></p>
+  <p><strong>권한:</strong> <span th:text="${user.userAuth}"></span></p>
+
+  <form th:action="@{'/admin/users/' + ${user.userIdx} + '/delete'}" method="post" 
+      onsubmit="return confirm('정말 삭제하시겠습니까?');">
+    <button type="submit">삭제</button>
+  </form>
+
+  <form th:action="@{'/admin/users/' + ${user.userIdx} + '/update'}" method="post">
+    <input type="text" name="userNm" placeholder="새 이름 입력" />
+    <button type="submit">이름 수정</button>
+  </form>
+
+  <a href="/admin/users">목록으로</a>
+</body>
+</html>

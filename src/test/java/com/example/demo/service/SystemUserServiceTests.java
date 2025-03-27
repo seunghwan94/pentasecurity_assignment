@@ -1,11 +1,16 @@
 package com.example.demo.service;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import java.util.List;
+import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import com.example.demo.entity.SystemUser;
 import com.example.demo.repository.SystemUserRepository;
@@ -19,11 +24,46 @@ public class SystemUserServiceTests {
   private SystemUserService service;
   @Autowired
   private SystemUserRepository userRepository;
+  @Autowired
+  private PasswordEncoder passwordEncoder;
   private String ipAddress;
 
   @BeforeEach
   void setUp() {
     ipAddress = "127.0.0.1";
+  }
+
+  @Test
+  void createAdminAndUser() {
+    // 관리자
+    SystemUser admin = SystemUser.builder()
+              .userId("admin_test")
+              .userPw(passwordEncoder.encode("admin123"))
+              .userNm("관리자 테스트")
+              .userAuth("SYSTEM_ADMIN")
+              .build();
+            service.createUser(admin, ipAddress);
+
+    // 일반회원
+    SystemUser user = SystemUser.builder()
+              .userId("user_test")
+              .userPw(passwordEncoder.encode("user123"))
+              .userNm("일반회원 테스트")
+              .userAuth("USER")
+              .build();
+            service.createUser(user, ipAddress);
+
+    // 검증
+    Optional<SystemUser> savedAdmin = userRepository.findByUserId("admin_test");
+    Optional<SystemUser> savedUser = userRepository.findByUserId("user_test");
+
+    assertTrue(savedAdmin.isPresent());
+    assertTrue(savedUser.isPresent());
+
+    assertEquals("관리자 테스트", savedAdmin.get().getUserNm());
+    assertEquals("일반회원 테스트", savedUser.get().getUserNm());
+    assertEquals("SYSTEM_ADMIN", savedAdmin.get().getUserAuth());
+    assertEquals("USER", savedUser.get().getUserAuth());
   }
 
   @Test
